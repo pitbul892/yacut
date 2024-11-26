@@ -1,29 +1,8 @@
-import random
-import re
-import string
-
 from flask import flash, redirect, render_template, url_for
 
-from . import app, db
-from .constants import MAX_GENERATE_LiNK, MAX_SHORT_LINK
+from . import app
 from .forms import UrlMapForm
 from .models import URLMap
-
-
-def generate_short_link(length=MAX_GENERATE_LiNK):
-    characters = string.ascii_letters + string.digits
-    short_link = ''.join(random.choices(characters, k=length))
-    if check_not_unique(short_link):
-        return generate_short_link()
-    return short_link
-
-
-def check_not_unique(short):
-    return URLMap.query.filter_by(short=short).first() is not None
-
-
-def check_validate_short_link(short):
-    return re.findall('^[a-zA-Z0-9]+$', short) and len(short) <= MAX_SHORT_LINK
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -32,21 +11,17 @@ def index_view():
     if not form.validate_on_submit():
         return render_template('new_link.html', form=form)
     short = form.custom_id.data
-    if short is not None and short != '':
-        if not check_validate_short_link(short):
-            flash('Указано недопустимое имя для короткой ссылки')
+    if short:
+        try:
+            URLMap.validate_short_link(short)
+        except ValueError as e:
+            flash(str(e))
             return render_template('new_link.html', form=form)
-        if check_not_unique(short):
-            flash('Предложенный вариант короткой ссылки уже существует.')
-            return render_template('new_link.html', form=form)
+
     else:
-        short = generate_short_link()
-    url_map = URLMap(
-        original=form.original_link.data,
-        short=short
-    )
-    db.session.add(url_map)
-    db.session.commit()
+        short = URLMap.generate_short_link()
+    url_map = URLMap.from_dict(form.original_link.data, short)
+    url_map.save()
     return render_template(
         'new_link.html',
         form=form,
