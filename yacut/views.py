@@ -11,17 +11,13 @@ def index_view():
     if not form.validate_on_submit():
         return render_template('new_link.html', form=form)
     short = form.custom_id.data
-    if short:
-        try:
-            URLMap.validate_short_link(short)
-        except ValueError as e:
-            flash(str(e))
-            return render_template('new_link.html', form=form)
-
-    else:
-        short = URLMap.generate_short_link()
     url_map = URLMap.from_dict(form.original_link.data, short)
-    url_map.save()
+
+    try:
+        url_map.save()
+    except ValueError as e:
+        flash(str(e))
+        return render_template('new_link.html', form=form)
     return render_template(
         'new_link.html',
         form=form,

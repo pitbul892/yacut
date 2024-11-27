@@ -14,20 +14,19 @@ def add_url():
         raise InvalidAPIUsage('"url" является обязательным полем!')
     if 'custom_id' in data and data['custom_id'] != '':
         short = data['custom_id']
-        try:
-            URLMap.validate_short_link(short)
-        except ValueError as e:
-            raise InvalidAPIUsage(str(e))
     else:
-        data['custom_id'] = URLMap.generate_short_link()
-    url_map = URLMap.from_dict(data['url'], data['custom_id'])
-    url_map.save()
+        short = None
+    url_map = URLMap.from_dict(data['url'], short)
+    try:
+        url_map.save()
+    except ValueError as e:
+        raise InvalidAPIUsage(str(e))
     return jsonify(url_map.to_dict()), 201
 
 
 @app.route('/api/id/<short>/', methods=['GET'])
 def get_url(short):
     url_map = URLMap.get(short)
-    if url_map is None:
+    if not url_map:
         raise InvalidAPIUsage('Указанный id не найден', 404)
     return jsonify({'url': url_map.original}), 200

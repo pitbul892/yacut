@@ -1,8 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, URLField
-from wtforms.validators import DataRequired, Length
+from wtforms.validators import DataRequired, Regexp
 
-from .constants import MAX_SHORT_LINK
+from .constants import PATTERN_FOR_SHORT_LINK
 
 
 class UrlMapForm(FlaskForm):
@@ -12,6 +12,6 @@ class UrlMapForm(FlaskForm):
     )
     custom_id = StringField(
         'Ваш вариант короткой ссылки',
-        validators=[Length(0, MAX_SHORT_LINK)]
+        validators=[Regexp(PATTERN_FOR_SHORT_LINK)]
     )
     submit = SubmitField('Создать')
