@@ -27,7 +27,6 @@ class URLMap(db.Model):
 
     @classmethod
     def from_dict(cls, original, short):
-        
         return cls(
             original=original,
             short=short
