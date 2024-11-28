@@ -27,6 +27,7 @@ class URLMap(db.Model):
 
     @classmethod
     def from_dict(cls, original, short):
+        
         return cls(
             original=original,
             short=short
@@ -38,10 +39,9 @@ class URLMap(db.Model):
 
     @classmethod
     def generate_short_link(cls, length=MAX_GENERATE_LiNK, max=MAX_ATTEMPTS):
-        characters = CHARACTERS
         attemts = 0
         while attemts <= max:
-            short_link = ''.join(random.choices(characters, k=length))
+            short_link = ''.join(random.choices(CHARACTERS, k=length))
             if cls.get(short_link) is None:
                 return short_link
             attemts += 1

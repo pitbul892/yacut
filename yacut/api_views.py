@@ -12,10 +12,7 @@ def add_url():
         raise InvalidAPIUsage('Отсутствует тело запроса')
     if 'url' not in data:
         raise InvalidAPIUsage('"url" является обязательным полем!')
-    if 'custom_id' in data and data['custom_id'] != '':
-        short = data['custom_id']
-    else:
-        short = None
+    short = data.get('custom_id', None)
     url_map = URLMap.from_dict(data['url'], short)
     try:
         url_map.save()
